@@ -1,6 +1,8 @@
 CD74HC4067 Button library for the ESP32 
 Breakout Board: https://www.sparkfun.com/products/9056
 
+See video for an example using this library: https://youtu.be/_CXPyHXz_Ys
+
 Arduino platform
 
 This library polls 16 input lines of up to 4 4067 analog MUX and returns button events or analog values.
