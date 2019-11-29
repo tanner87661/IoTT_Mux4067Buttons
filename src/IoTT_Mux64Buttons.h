@@ -110,6 +110,6 @@ class IoTT_Mux64Buttons
 
 extern void onButtonEvent(uint16_t btnAddr, buttonEvent btnEvent) __attribute__ ((weak));
 extern void onAnalogData(uint16_t inpAddr, uint16_t analogValue ) __attribute__ ((weak));
-
+extern void onBtnDiagnose(uint8_t evtType, uint8_t portNr, uint16_t inpAddr, uint16_t btnValue) __attribute__ ((weak));
 
 #endif

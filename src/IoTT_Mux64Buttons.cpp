@@ -163,9 +163,13 @@ bool IoTT_Mux64Buttons::getButtonState(int btnNr)
 	return &touchArray[btnNr].btnStatus;
 }
 
-void IoTT_Mux64Buttons::sendButtonEvent(uint16_t btnAddr, buttonEvent btnEvent)
+void IoTT_Mux64Buttons::sendButtonEvent(uint16_t btnNr, buttonEvent btnEvent)
 {
-  if ((onButtonEvent) && (startUpCtr==0)) onButtonEvent(btnAddr, btnEvent);
+  IoTT_ButtonConfig * thisTouchData = &touchArray[btnNr];
+  if ((onButtonEvent) && (startUpCtr==0)) 
+	onButtonEvent(thisTouchData->btnAddr, btnEvent);
+  if ((onBtnDiagnose) && (startUpCtr==0)) 
+	onBtnDiagnose(0, btnNr, thisTouchData->btnAddr, btnEvent);
 }
 
 void IoTT_Mux64Buttons::sendAnalogData(uint8_t btnNr, uint16_t analogValue)
@@ -178,6 +182,8 @@ void IoTT_Mux64Buttons::sendAnalogData(uint8_t btnNr, uint16_t analogValue)
 		  thisTouchData->lastPublishedData = analogValue;
 		  if ((onAnalogData) && (startUpCtr==0)) 
 			onAnalogData(thisTouchData->btnAddr, analogValue);
+  		  if ((onBtnDiagnose) && (startUpCtr==0)) 
+			onBtnDiagnose(0, btnNr, thisTouchData->btnAddr, analogValue);
 		  thisTouchData->nextHoldUpdateTime = millis() + analogMinMsgDelay;
 	  }
   }
@@ -188,7 +194,7 @@ void IoTT_Mux64Buttons::processDigitalHold(uint8_t btnNr) //call onButtonHold fu
   IoTT_ButtonConfig * thisTouchData = &touchArray[btnNr];
   if ((thisTouchData->btnStatus) && (millis() > thisTouchData->nextHoldUpdateTime))
   {
-	  sendButtonEvent(thisTouchData->btnAddr, onbtnhold);
+	  sendButtonEvent(btnNr, onbtnhold);
 	  thisTouchData->nextHoldUpdateTime += holdThreshold;
   }
 }
@@ -205,21 +211,21 @@ void IoTT_Mux64Buttons::processDigitalButton(uint8_t btnNr, bool btnPressed)
 	thisTouchData->btnStatus = btnPressed;
 	if (btnPressed)
 	{
-		sendButtonEvent(thisTouchData->btnAddr, onbtndown);
+		sendButtonEvent(btnNr, onbtndown);
 		thisTouchData->nextHoldUpdateTime = millis() + holdThreshold;
 	}
 	else
 	{
-		sendButtonEvent(thisTouchData->btnAddr, onbtnup);
+		sendButtonEvent(btnNr, onbtnup);
 		//more processing for click and dblclick
 		uint8_t prevUpTime = (thisTouchData->lastEvtPtr + 2) &0x03; //same as mod 4
 		if ((thisTouchData->lastStateChgTime[prevUpTime] != 0) && ((thisTouchData->lastStateChgTime[thisTouchData->lastEvtPtr] - thisTouchData->lastStateChgTime[prevUpTime]) < dblClickThreshold))
 		{
-			sendButtonEvent(thisTouchData->btnAddr, onbtndblclick);
+			sendButtonEvent(btnNr, onbtndblclick);
 		}
 		else
 		{
-			sendButtonEvent(thisTouchData->btnAddr, onbtnclick);
+			sendButtonEvent(btnNr, onbtnclick);
 		}
     }
   }
